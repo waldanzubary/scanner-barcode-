@@ -22,7 +22,7 @@ A Python script that scans barcodes using a webcam, interacts with a web form, a
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/waldanzubary/scanner-barcode.git
+    https://github.com/waldanzubary/scanner-barcode-.git
    
     ```
 
