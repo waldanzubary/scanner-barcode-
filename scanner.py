@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from pyzbar.pyzbar import decode
+from playsound import playsound  # Make sure to install playsound using `pip install playsound`
 
 def scan_barcode(save_to_csv=False):
     """Scans barcodes from the webcam, interacts with a web form, and optionally saves data to CSV.
@@ -17,6 +18,7 @@ def scan_barcode(save_to_csv=False):
         # Initialize Selenium driver
         driver = webdriver.Chrome()
         driver.get("http://127.0.0.1:8000/sales/creates")
+        
 
         # Initialize webcam capture
         cap = cv2.VideoCapture(0)
@@ -38,6 +40,7 @@ def scan_barcode(save_to_csv=False):
             ret, frame = cap.read()
 
             if not ret:
+                print("Gagal membaca frame dari kamera.")
                 break
 
             # Decode barcodes from the frame
@@ -62,13 +65,16 @@ def scan_barcode(save_to_csv=False):
                         csv_writer.writerow([timestamp, barcode_data])
 
                     print(f"Barcode {barcode_data} berhasil dipindai.")
+                    
+                    # Play beep sound
+                    playsound('Beep.mp3')  # Adjust the file path as needed
 
                     # Submit the form by pressing Enter
                     input_element.send_keys(Keys.ENTER)
                     print("Form telah disubmit dengan menekan Enter.")
 
                 else:
-                    print(f"Barcode {barcode_data} sudah dipindai dalam 10 detik terakhir, tidak disimpan.")
+                    print(f"Barcode {barcode_data} sudah dipindai dalam 3 detik terakhir, tidak disimpan.")
 
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
