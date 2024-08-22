@@ -18,13 +18,12 @@ def scan_barcode(save_to_csv=False):
         # Initialize Selenium driver
         driver = webdriver.Chrome()
         driver.get("http://127.0.0.1:8000/sales/creates")
-        
 
         # Initialize webcam capture
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(0)  # Try changing the index if needed
 
         if not cap.isOpened():
-            print("Gagal membuka kamera.")
+            print("Gagal membuka kamera. Pastikan DroidCam aktif dan terhubung dengan benar.")
             return
 
         last_save_time = None
@@ -43,38 +42,49 @@ def scan_barcode(save_to_csv=False):
                 print("Gagal membaca frame dari kamera.")
                 break
 
+            # Display the frame in a window
+            cv2.imshow('Webcam Feed', frame)
+
             # Decode barcodes from the frame
             barcodes = decode(frame)
 
-            for barcode in barcodes:
-                barcode_data = barcode.data.decode("utf-8")
+            if barcodes:
+                for barcode in barcodes:
+                    barcode_data = barcode.data.decode("utf-8")
 
-                # Check timestamp for saving to CSV
-                current_time = time.time()
-                if last_save_time is None or (current_time - last_save_time > 3):
-                    # Update last save time
-                    last_save_time = current_time
+                    # Check timestamp for saving to CSV
+                    current_time = time.time()
+                    if last_save_time is None or (current_time - last_save_time > 3):
+                        # Update last save time
+                        last_save_time = current_time
 
-                    # Interact with the web form
-                    input_element = driver.find_element(By.ID, "barcode_input")
-                    input_element.clear()
-                    input_element.send_keys(barcode_data)
+                        # Interact with the web form
+                        input_element = driver.find_element(By.ID, "barcode_input")
+                        input_element.clear()
+                        input_element.send_keys(barcode_data)
 
-                    if save_to_csv:
-                        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                        csv_writer.writerow([timestamp, barcode_data])
+                        if save_to_csv:
+                            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                            csv_writer.writerow([timestamp, barcode_data])
 
-                    print(f"Barcode {barcode_data} berhasil dipindai.")
-                    
-                    # Play beep sound
-                    playsound('Beep.mp3')  # Adjust the file path as needed
+                        print(f"Barcode {barcode_data} berhasil dipindai.")
+                        
+                        # Play beep sound
+                        playsound('Beep.mp3')  # Adjust the file path as needed
 
-                    # Submit the form by pressing Enter
-                    input_element.send_keys(Keys.ENTER)
-                    print("Form telah disubmit dengan menekan Enter.")
+                        # Submit the form by pressing Enter
+                        input_element.send_keys(Keys.ENTER)
+                        print("Form telah disubmit dengan menekan Enter.")
 
-                else:
-                    print(f"Barcode {barcode_data} sudah dipindai dalam 3 detik terakhir, tidak disimpan.")
+                    else:
+                        print(f"Barcode {barcode_data} sudah dipindai dalam 3 detik terakhir, tidak disimpan.")
+
+            # Exit the loop if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+            # Add a short delay to reduce CPU usage
+            # time.sleep(0.1)
 
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
