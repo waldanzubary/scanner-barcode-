@@ -16,7 +16,7 @@ def scan_barcode(save_to_csv=False):
 
     try:
         # Initialize Selenium driver
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome()  # Pastikan chromedriver sesuai dengan versi Chrome
         driver.get("http://127.0.0.1:8000/sales/creates")
 
         # Initialize webcam capture
@@ -51,6 +51,7 @@ def scan_barcode(save_to_csv=False):
             if barcodes:
                 for barcode in barcodes:
                     barcode_data = barcode.data.decode("utf-8")
+                    print(f"Barcode ditemukan: {barcode_data}")
 
                     # Check timestamp for saving to CSV
                     current_time = time.time()
@@ -58,23 +59,27 @@ def scan_barcode(save_to_csv=False):
                         # Update last save time
                         last_save_time = current_time
 
-                        # Interact with the web form
-                        input_element = driver.find_element(By.ID, "barcode_input")
-                        input_element.clear()
-                        input_element.send_keys(barcode_data)
+                        try:
+                            # Interact with the web form
+                            input_element = driver.find_element(By.ID, "barcode_input")
+                            input_element.clear()
+                            input_element.send_keys(barcode_data)
 
-                        if save_to_csv:
-                            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-                            csv_writer.writerow([timestamp, barcode_data])
+                            if save_to_csv:
+                                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                                csv_writer.writerow([timestamp, barcode_data])
 
-                        print(f"Barcode {barcode_data} berhasil dipindai.")
-                        
-                        # Play beep sound
-                        playsound('Beep.mp3')  # Adjust the file path as needed
+                            print(f"Barcode {barcode_data} berhasil dipindai.")
+                            
+                            # Play beep sound
+                            playsound('Beep.mp3')  # Adjust the file path as needed
 
-                        # Submit the form by pressing Enter
-                        input_element.send_keys(Keys.ENTER)
-                        print("Form telah disubmit dengan menekan Enter.")
+                            # Submit the form by pressing Enter
+                            input_element.send_keys(Keys.ENTER)
+                            print("Form telah disubmit dengan menekan Enter.")
+
+                        except Exception as selenium_error:
+                            print(f"Terjadi kesalahan saat berinteraksi dengan form: {selenium_error}")
 
                     else:
                         print(f"Barcode {barcode_data} sudah dipindai dalam 3 detik terakhir, tidak disimpan.")
